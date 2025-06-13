@@ -352,39 +352,30 @@
 
     // --- SCRIPTS DAS NOVAS FUNCIONALIDADES ---
 
-    // 1. HORÓSCOPO DO AMOR
     function revelarHoroscopo() {
         document.getElementById('texto-horoscopo').classList.remove('hidden');
         document.getElementById('revelador-horoscopo').classList.add('hidden');
     }
 
-    // 2. RECEITA DO AMOR
     function gerarReceita() {
         const adjetivo = document.getElementById('input-adjetivo').value || '...';
         const piada = document.getElementById('input-piada').value || '...';
         const lugar = document.getElementById('input-lugar').value || '...';
         const apelido = document.getElementById('input-apelido').value || '...';
-
         const resultado = `Nossa receita especial é: Pegue 2 xícaras de <strong>${adjetivo}</strong>, adicione 1 colher de <strong>${piada}</strong>, misture com todo o carinho de <strong>${lugar}</strong> e sirva com uma dose generosa de <strong>${apelido}</strong>. Resultado: Perfeição!`;
-
         const resultadoEl = document.getElementById('resultado-receita');
         resultadoEl.innerHTML = resultado;
         resultadoEl.classList.remove('hidden');
     }
 
-    // 3. SAUDAÇÃO COM CLIMA (TOTALMENTE CORRIGIDO)
     async function buscarClima() {
         const saudacaoEl = document.getElementById('saudacao-dinamica');
         const apiKey = "9936b807c9ff2d089fdd04d41603b330";
         const lat = -23.4533; // Latitude de Guarulhos
         const lon = -46.5333; // Longitude de Guarulhos
-
-        // A LINHA ABAIXO FOI CORRIGIDA
         const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=pt_br`;
-
         let saudacaoFinal = "";
         const hora = new Date().getHours();
-
         try {
             const response = await fetch(url);
             if (!response.ok) {
@@ -393,17 +384,15 @@
             const data = await response.json();
             const temp = Math.round(data.main.temp);
             const desc = data.weather[0].description;
-
             if (hora >= 5 && hora < 12) {
-                saudacaoFinal = `Bom dia MEU AMOR! Que seu dia seja lindo com essa manhã de ${desc} e ${temp}°C. E QUE ESSA SURPRESA AQUEÇA SEU CORAÇÃO!`;
+                saudacaoFinal = `Bom dia! Que seu dia seja lindo com essa manhã de ${desc} e ${temp}°C. E QUE ESSA SURPRESA AQUEÇA SEU CORAÇÃO!`;
             } else if (hora >= 12 && hora < 18) {
-                saudacaoFinal = `Boa tarde MEU AMOR! Espero que este presente aqueça seu coração nesta tarde com ${desc} e ${temp}°C. E QUE ESSA SURPRESA AQUEÇA SEU CORAÇÃO!`;
+                saudacaoFinal = `Boa tarde! Espero que este presente aqueça seu coração nesta tarde com ${desc} e ${temp}°C. E QUE ESSA SURPRESA AQUEÇA SEU CORAÇÃO!`;
             } else {
-                saudacaoFinal = `Boa noite MEU AMOR! Espero que esteja bem nesta noite com ${desc} e ${temp}°C. E QUE ESSA SURPRESA AQUEÇA SEU CORAÇÃO!`;
+                saudacaoFinal = `Boa noite! Espero que esteja bem nesta noite com ${desc} e ${temp}°C. E QUE ESSA SURPRESA AQUEÇA SEU CORAÇÃO!`;
             }
         } catch (error) {
             console.error("Não foi possível buscar o clima:", error);
-            // Mensagem padrão caso a API falhe por qualquer motivo.
             if (hora >= 5 && hora < 12) { saudacaoFinal = "Bom dia e bem-vinda!"; }
             else if (hora >= 12 && hora < 18) { saudacaoFinal = "Boa tarde! Espero que goste da surpresa."; }
             else { saudacaoFinal = "Boa noite! Que esta surpresa ilumine sua noite."; }
@@ -411,7 +400,9 @@
         saudacaoEl.innerText = saudacaoFinal;
     }
 
-    // 4. CONSTELAÇÃO
+    // ===================================================================
+    // 4. CONSTELAÇÃO - INÍCIO DA VERSÃO CORRIGIDA PARA MOUSE E CELULAR
+    // ===================================================================
     function iniciarConstelacao() {
         const canvas = document.getElementById('canvas-constelacao');
         if (!canvas) return;
@@ -424,7 +415,7 @@
         let desenhando = false;
         let estrelaInicial = null;
         let conectadas = new Set();
-        let completo = false; // Flag para parar de desenhar
+        let completo = false;
 
         function desenhar() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -454,22 +445,38 @@
             return null;
         }
 
-        function onMouseDown(e) {
+        // Função unificada para iniciar a interação (clique ou toque)
+        function handleInteractionStart(e) {
+            e.preventDefault(); // Impede o navegador de rolar a página no celular
             if (completo) return;
+
             const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            // Pega as coordenadas corretas para mouse (clientX) ou toque (touches[0].clientX)
+            const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
+
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
+
             estrelaInicial = getEstrelaNoPonto(x, y);
             if (estrelaInicial !== null) {
                 desenhando = true;
             }
         }
 
-        function onMouseUp(e) {
+        // Função unificada para finalizar a interação (soltar clique ou toque)
+        function handleInteractionEnd(e) {
+            e.preventDefault();
             if (!desenhando || completo) return;
+
             const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            // Pega as coordenadas corretas (para 'touchend', usamos 'changedTouches')
+            const clientX = e.type.startsWith('touch') ? e.changedTouches[0].clientX : e.clientX;
+            const clientY = e.type.startsWith('touch') ? e.changedTouches[0].clientY : e.clientY;
+
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
+
             const estrelaFinal = getEstrelaNoPonto(x, y);
 
             if (estrelaFinal !== null && estrelaInicial !== estrelaFinal) {
@@ -480,6 +487,7 @@
                     conectadas.add(estrelaFinal);
                 }
             }
+
             desenhando = false;
             estrelaInicial = null;
             desenhar();
@@ -493,11 +501,19 @@
             }
         }
 
-        canvas.addEventListener('mousedown', onMouseDown);
-        canvas.addEventListener('mouseup', onMouseUp);
+        // Adiciona os event listeners para MOUSE
+        canvas.addEventListener('mousedown', handleInteractionStart);
+        canvas.addEventListener('mouseup', handleInteractionEnd);
 
-        desenhar();
+        // Adiciona os event listeners para TOQUE (CELULAR)
+        canvas.addEventListener('touchstart', handleInteractionStart, { passive: false });
+        canvas.addEventListener('touchend', handleInteractionEnd, { passive: false });
+
+        desenhar(); // Desenha o estado inicial
     }
+    // ===================================================================
+    // 4. CONSTELAÇÃO - FIM DA VERSÃO CORRIGIDA
+    // ===================================================================
 </script>
 </body>
 </html>
