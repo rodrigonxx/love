@@ -387,15 +387,15 @@
             if (hora >= 5 && hora < 12) {
                 saudacaoFinal = `Bom dia! Que seu dia seja lindo com essa manhã de ${desc} e ${temp}°C. E QUE ESSA SURPRESA AQUEÇA SEU CORAÇÃO!`;
             } else if (hora >= 12 && hora < 18) {
-                saudacaoFinal = `Boa tarde! Espero que este presente aqueça seu coração nesta tarde com ${desc} e ${temp}°C. E QUE ESSA SURPRESA AQUEÇA SEU CORAÇÃO!`;
+                saudacaoFinal = `Boa tarde! Espero que este presente aqueça seu coração nesta tarde com ${desc} e ${temp}°C. E QUE ESSA SURPRESA AQUEÇA SEU CORAÇÃO MAIS AINDA!`;
             } else {
                 saudacaoFinal = `Boa noite! Espero que esteja bem nesta noite com ${desc} e ${temp}°C. E QUE ESSA SURPRESA AQUEÇA SEU CORAÇÃO!`;
             }
         } catch (error) {
             console.error("Não foi possível buscar o clima:", error);
-            if (hora >= 5 && hora < 12) { saudacaoFinal = "Bom dia e bem-vinda!"; }
-            else if (hora >= 12 && hora < 18) { saudacaoFinal = "Boa tarde! Espero que goste da surpresa."; }
-            else { saudacaoFinal = "Boa noite! Que esta surpresa ilumine sua noite."; }
+            if (hora >= 5 && hora < 12) { saudacaoFinal = "Bom dia MEU AMOR! Que seu dia seja lindo, E QUE ESSA SURPRESA AQUEÇA SEU CORAÇÃO!"; }
+            else if (hora >= 12 && hora < 18) { saudacaoFinal = "Boa tarde MEU AMOR! Espero que este presente aqueça seu coração nesta tarde, E QUE ESSA SURPRESA AQUEÇA SEU CORAÇÃO MAIS AINDA!"; }
+            else { saudacaoFinal = "Boa noite MEU AMOR! Espero que esteja bem nesta noite, E QUE ESSA SURPRESA AQUEÇA SEU CORAÇÃO"; }
         }
         saudacaoEl.innerText = saudacaoFinal;
     }
