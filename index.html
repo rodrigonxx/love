@@ -362,7 +362,7 @@
         const piada = document.getElementById('input-piada').value || '...';
         const lugar = document.getElementById('input-lugar').value || '...';
         const apelido = document.getElementById('input-apelido').value || '...';
-        const resultado = `Nossa receita especial é: Pegue 2 xícaras de <strong>${adjetivo}</strong>, adicione 1 colher de <strong>${piada}</strong>, misture com todo o carinho de <strong>${lugar}</strong> e sirva com uma dose generosa de <strong>${apelido}</strong>. Resultado: Perfeição!`;
+        const resultado = `Nossa receita especial é: Pegue 2 xícaras de <strong><span class="math-inline">\{adjetivo\}</strong\>, adicione 1 colher de <strong\></span>{piada}</strong>, misture com todo o carinho de <strong><span class="math-inline">\{lugar\}</strong\> e sirva com uma dose generosa de <strong\></span>{apelido}</strong>. Resultado: Perfeição!`;
         const resultadoEl = document.getElementById('resultado-receita');
         resultadoEl.innerHTML = resultado;
         resultadoEl.classList.remove('hidden');
@@ -373,7 +373,7 @@
         const apiKey = "9936b807c9ff2d089fdd04d41603b330";
         const lat = -23.4533; // Latitude de Guarulhos
         const lon = -46.5333; // Longitude de Guarulhos
-        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=pt_br`;
+        const url = `https://api.openweathermap.org/data/2.5/weather?lat=<span class="math-inline">\{lat\}&lon\=</span>{lon}&appid=${apiKey}&units=metric&lang=pt_br`;
         let saudacaoFinal = "";
         const hora = new Date().getHours();
         try {
@@ -385,11 +385,11 @@
             const temp = Math.round(data.main.temp);
             const desc = data.weather[0].description;
             if (hora >= 5 && hora < 12) {
-                saudacaoFinal = `Bom dia! Que seu dia seja lindo com essa manhã de ${desc} e ${temp}°C. E QUE ESSA SURPRESA AQUEÇA SEU CORAÇÃO!`;
+                saudacaoFinal = `Bom dia MEU AMOR! Que seu dia seja lindo com essa manhã de ${desc} e ${temp}°C. E QUE ESSA SURPRESA AQUEÇA SEU CORAÇÃO!`;
             } else if (hora >= 12 && hora < 18) {
-                saudacaoFinal = `Boa tarde! Espero que este presente aqueça seu coração nesta tarde com ${desc} e ${temp}°C. E QUE ESSA SURPRESA AQUEÇA SEU CORAÇÃO MAIS AINDA!`;
+                saudacaoFinal = `Boa tarde MEU AMOR! Espero que este presente aqueça seu coração nesta tarde com ${desc} e ${temp}°C. E QUE ESSA SURPRESA AQUEÇA SEU CORAÇÃO MAIS AINDA!`;
             } else {
-                saudacaoFinal = `Boa noite! Espero que esteja bem nesta noite com ${desc} e ${temp}°C. E QUE ESSA SURPRESA AQUEÇA SEU CORAÇÃO!`;
+                saudacaoFinal = `Boa noite MEU AMOR! Espero que esteja bem nesta noite com ${desc} e ${temp}°C. E QUE ESSA SURPRESA AQUEÇA SEU CORAÇÃO!`;
             }
         } catch (error) {
             console.error("Não foi possível buscar o clima:", error);
@@ -401,7 +401,7 @@
     }
 
     // ===================================================================
-    // 4. CONSTELAÇÃO - INÍCIO DA VERSÃO CORRIGIDA PARA MOUSE E CELULAR
+    // 4. CONSTELAÇÃO - VERSÃO COM INTERAÇÃO MELHORADA
     // ===================================================================
     function iniciarConstelacao() {
         const canvas = document.getElementById('canvas-constelacao');
@@ -410,15 +410,19 @@
         const resultadoEl = document.getElementById('constelacao-resultado');
 
         const estrelas = [{x: 80, y: 100}, {x: 200, y: 50}, {x: 320, y: 150}, {x: 150, y: 300}];
-        const raioEstrela = 10;
+        const raioEstrela = 10; // Tamanho visual da estrela
+        const raioAcerto = 20; // ÁREA DE ACERTO MAIOR para facilitar
         let linhas = [];
         let desenhando = false;
         let estrelaInicial = null;
+        let pontoAtual = null; // Guarda a posição do dedo/mouse ao arrastar
         let conectadas = new Set();
         let completo = false;
 
         function desenhar() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Desenha as linhas permanentes
             linhas.forEach(linha => {
                 ctx.beginPath();
                 ctx.moveTo(linha.inicio.x, linha.inicio.y);
@@ -427,6 +431,21 @@
                 ctx.lineWidth = 3;
                 ctx.stroke();
             });
+
+            // NOVO: Desenha a linha temporária de arraste
+            if (desenhando && estrelaInicial !== null && pontoAtual !== null) {
+                const inicio = estrelas[estrelaInicial];
+                ctx.beginPath();
+                ctx.moveTo(inicio.x, inicio.y);
+                ctx.lineTo(pontoAtual.x, pontoAtual.y);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]); // Linha pontilhada
+                ctx.stroke();
+                ctx.setLineDash([]); // Reseta para linhas sólidas
+            }
+
+            // Desenha as estrelas por cima de tudo
             estrelas.forEach((estrela, i) => {
                 ctx.beginPath();
                 ctx.arc(estrela.x, estrela.y, raioEstrela, 0, Math.PI * 2);
@@ -438,45 +457,47 @@
         function getEstrelaNoPonto(x, y) {
             for (let i = 0; i < estrelas.length; i++) {
                 const dist = Math.sqrt(Math.pow(estrelas[i].x - x, 2) + Math.pow(estrelas[i].y - y, 2));
-                if (dist < raioEstrela) {
+                if (dist < raioAcerto) { // Usa o raio de acerto maior
                     return i;
                 }
             }
             return null;
         }
 
-        // Função unificada para iniciar a interação (clique ou toque)
         function handleInteractionStart(e) {
-            e.preventDefault(); // Impede o navegador de rolar a página no celular
+            e.preventDefault();
             if (completo) return;
-
             const rect = canvas.getBoundingClientRect();
-            // Pega as coordenadas corretas para mouse (clientX) ou toque (touches[0].clientX)
             const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
             const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
-
             const x = clientX - rect.left;
             const y = clientY - rect.top;
-
             estrelaInicial = getEstrelaNoPonto(x, y);
             if (estrelaInicial !== null) {
                 desenhando = true;
             }
         }
 
-        // Função unificada para finalizar a interação (soltar clique ou toque)
+        // NOVO: Função para lidar com o movimento de arrastar
+        function handleInteractionMove(e) {
+            e.preventDefault();
+            if (!desenhando) return;
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
+            pontoAtual = { x: clientX - rect.left, y: clientY - rect.top };
+            desenhar();
+        }
+
         function handleInteractionEnd(e) {
             e.preventDefault();
             if (!desenhando || completo) return;
 
             const rect = canvas.getBoundingClientRect();
-            // Pega as coordenadas corretas (para 'touchend', usamos 'changedTouches')
             const clientX = e.type.startsWith('touch') ? e.changedTouches[0].clientX : e.clientX;
             const clientY = e.type.startsWith('touch') ? e.changedTouches[0].clientY : e.clientY;
-
             const x = clientX - rect.left;
             const y = clientY - rect.top;
-
             const estrelaFinal = getEstrelaNoPonto(x, y);
 
             if (estrelaFinal !== null && estrelaInicial !== estrelaFinal) {
@@ -490,6 +511,7 @@
 
             desenhando = false;
             estrelaInicial = null;
+            pontoAtual = null; // Limpa o ponto de arraste
             desenhar();
 
             if (conectadas.size === estrelas.length) {
@@ -501,19 +523,28 @@
             }
         }
 
-        // Adiciona os event listeners para MOUSE
+        // Adiciona todos os event listeners necessários
         canvas.addEventListener('mousedown', handleInteractionStart);
-        canvas.addEventListener('mouseup', handleInteractionEnd);
-
-        // Adiciona os event listeners para TOQUE (CELULAR)
         canvas.addEventListener('touchstart', handleInteractionStart, { passive: false });
-        canvas.addEventListener('touchend', handleInteractionEnd, { passive: false });
 
-        desenhar(); // Desenha o estado inicial
+        canvas.addEventListener('mousemove', handleInteractionMove);
+        canvas.addEventListener('touchmove', handleInteractionMove, { passive: false });
+
+        canvas.addEventListener('mouseup', handleInteractionEnd);
+        canvas.addEventListener('touchend', handleInteractionEnd);
+
+        // Listener para caso o mouse saia da área do canvas
+        canvas.addEventListener('mouseleave', () => {
+             if (desenhando) {
+                desenhando = false;
+                estrelaInicial = null;
+                pontoAtual = null;
+                desenhar();
+            }
+        });
+
+        desenhar();
     }
-    // ===================================================================
-    // 4. CONSTELAÇÃO - FIM DA VERSÃO CORRIGIDA
-    // ===================================================================
 </script>
 </body>
 </html>
